@@ -2,7 +2,6 @@ import dynamic from 'next/dynamic';
 import Hero from '@/components/sections/Hero';
 
 // Enable instant shell pre-rendering in Next.js 16/15
-export const unstable_instant = { prefetch: 'static' };
 
 // Dynamically import all below-the-fold components to reduce initial JavaScript payload size
 const About = dynamic(() => import('@/components/sections/About'));
