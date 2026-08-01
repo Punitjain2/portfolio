@@ -25,11 +25,13 @@ export default function Hero() {
 useEffect(() => {
   const savedTheme = localStorage.getItem("theme") || "dark";
 
-  setTheme(savedTheme);
-
   document.documentElement.classList.remove("dark", "light");
   document.documentElement.classList.add(savedTheme);
-}, []);
+
+  if (savedTheme !== theme) {
+    setTimeout(() => setTheme(savedTheme), 0);
+  }
+}, [theme]);
   
   useEffect(() => {
     const activeWord = typingTexts[textIndex];
@@ -44,13 +46,16 @@ useEffect(() => {
         setTypedText(activeWord.substring(0, typedText.length + 1));
       }, 100);
     }
-
-    if (!isDeleting && typedText === activeWord) {
-      timer = setTimeout(() => setIsDeleting(true), 2000); // Wait before starting delete
-    } else if (isDeleting && typedText === '') {
-      setIsDeleting(false);
-      setTextIndex((prev) => (prev + 1) % typingTexts.length);
-    }
+if (!isDeleting && typedText === activeWord) {
+  timer = setTimeout(() => {
+    setIsDeleting(true);
+  }, 2000);
+} else if (isDeleting && typedText === '') {
+  timer = setTimeout(() => {
+    setIsDeleting(false);
+    setTextIndex((prev) => (prev + 1) % typingTexts.length);
+  }, 0);
+}
 
     return () => clearTimeout(timer);
   }, [typedText, isDeleting, textIndex]);

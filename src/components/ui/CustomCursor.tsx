@@ -27,7 +27,9 @@ export default function CustomCursor() {
     const isMobile = window.matchMedia('(max-width: 1024px)').matches;
     if (isMobile) return;
 
-    setIsVisible(true);
+    requestAnimationFrame(() => {
+  setIsVisible(true);
+});
     document.body.classList.add('custom-cursor-active');
 
     const moveCursor = (e: MouseEvent) => {
