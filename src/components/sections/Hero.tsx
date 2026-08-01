@@ -101,7 +101,7 @@ useEffect(() => {
 
 </div>
         {/* Left Typography Column */}
-        <div className="lg:col-span-7 flex flex-col items-start text-left">
+        <div className="lg:col-span-6 flex flex-col items-start text-left">
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -209,7 +209,7 @@ useEffect(() => {
               <GithubIcon size={24} />
             </a>
             <a
-              href="mailto:punit.jain@avantika.edu.in"
+              href="mailto:punitj668@gmail.com"
               className="text-zinc-500 hover:text-accent transition-colors p-1 hover:scale-110 duration-200 hover-target"
               aria-label="Send Email"
             >
@@ -220,7 +220,7 @@ useEffect(() => {
         </div>
 
         {/* Right Illustration Column */}
-        <div className="lg:col-span-5 flex justify-center items-center w-full relative">
+        <div className="lg:col-span-6 flex justify-center items-center w-full relative">
           <motion.div
   initial={{ opacity: 0, x: 40 }}
   animate={{ opacity: 1, x: 0 }}
@@ -229,7 +229,7 @@ useEffect(() => {
 >
 
 <div className="absolute w-[500px] h-[500px] bg-[#00FF88]/10 blur-[140px] rounded-full" />
-  <div className="relative w-[420px] h-[560px] md:w-[650px] md:h-[850px]">
+  <div className="relative w-[550px] h-[700px] md:w-[800px] md:h-[1000px]">
 
     <Image
       src="/punit-cutout.png"
@@ -237,7 +237,7 @@ useEffect(() => {
       fill
       priority
       className="object-contain relative z-10 drop-shadow-[0_0_40px_rgba(99,102,241,0.4)]"
-      sizes="(max-width:768px) 420px, 650px"
+      sizes="(max-width:768px) 550px, 800px"
     />
 
   </div>

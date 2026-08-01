@@ -146,14 +146,14 @@ export default function Header() {
                   <LinkedinIcon size={20} />
                 </a>
                 <a
-                  href="mailto:punit.jain@avantika.edu.in"
+                  href="mailto:punitj668@gmail.com"
                   className="p-3 rounded-full bg-foreground/5 border border-foreground/10 text-zinc-400 hover:text-foreground transition-colors"
                 >
                   <Mail size={20} />
                 </a>
               </div>
               <div className="text-sm text-zinc-500 font-mono">
-                punit.jain@avantika.edu.in
+                punitj668@gmail.com
               </div>
             </div>
           </motion.div>

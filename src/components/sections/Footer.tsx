@@ -138,7 +138,7 @@ export default function Footer() {
             </a>
 
             <a
-              href="mailto:punit.jain@avantika.edu.in"
+              href="mailto:punitj668@gmail.com"
               className="text-zinc-500 hover:text-white transition-colors hover-target"
               aria-label="Email"
             >

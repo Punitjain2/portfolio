@@ -3,6 +3,7 @@ import Hero from '@/components/sections/Hero';
 
 // Enable instant shell pre-rendering in Next.js 16/15
 
+
 // Dynamically import all below-the-fold components to reduce initial JavaScript payload size
 const About = dynamic(() => import('@/components/sections/About'));
 const Education = dynamic(() => import('@/components/sections/Education'));

@@ -32,12 +32,12 @@ export const metadata: Metadata = {
     'React Developer India',
     'Full Stack Engineer India',
   ],
-  authors: [{ name: 'Punit Jain', url: 'mailto:punit.jain@avantika.edu.in' }],
+  authors: [{ name: 'Punit Jain', url: 'mailto:punitj668@gmail.com' }],
   creator: 'Punit Jain',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://punitjain.dev',
+    url: 'https://portfolio.vercel.app',
     title: 'Punit Jain | Software Engineer & AI Innovator',
     description:
       'Professional portfolio website of Punit Jain. Showcasing Full Stack systems, native Android layouts, smart IoT nodes, and data visualizations.',
@@ -61,9 +61,10 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
-    >
+  lang="en"
+  suppressHydrationWarning
+  className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
+>
       <body className="min-h-full flex flex-col bg-background text-foreground overflow-x-hidden antialiased">
         {/* Core page entrance load counter */}
         <PageLoader />
