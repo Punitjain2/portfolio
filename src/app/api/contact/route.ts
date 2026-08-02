@@ -25,15 +25,18 @@ export async function POST(req: Request) {
 
     if (!host || !user || !pass || !receiver) {
       console.error('SMTP credentials or receiver email are not fully configured in environment variables');
+      console.error('Missing:', { 
+        host: !!host, 
+        user: !!user, 
+        pass: !!pass, 
+        receiver: !!receiver 
+      });
       return NextResponse.json(
-        { error: 'Mail server configuration error. Please contact the administrator.' },
+        { error: 'Mail server configuration error. Missing SMTP credentials. Please check .env.local file.' },
         { status: 500 }
       );
     }
-    console.log("HOST:", process.env.SMTP_HOST);
-    console.log("PORT:", process.env.SMTP_PORT);
-    console.log("USER:", process.env.SMTP_USER);
-    console.log("PASS LENGTH:", process.env.SMTP_PASSWORD?.length);
+    console.log("SMTP Config:", { host, port, user, passLength: pass?.length, receiver });
 
     // Create SMTP transport
     const transporter = nodemailer.createTransport({
