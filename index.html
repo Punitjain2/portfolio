@@ -1056,6 +1056,7 @@ document.getElementById('themeBtn').addEventListener('click', function(){
     document.documentElement.style.scrollBehavior = 'auto';
     var lenis = new Lenis({ duration: 1.05 });
     lenis.on('scroll', ScrollTrigger.update);
+    ScrollTrigger.addEventListener('refresh', function(){ lenis.resize(); });
     gsap.ticker.add(function(t){ lenis.raf(t*1000); });
     gsap.ticker.lagSmoothing(0);
     document.querySelectorAll('a[href^="#"]').forEach(function(a){
