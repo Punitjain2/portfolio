@@ -417,6 +417,64 @@ footer{border-top:1px solid var(--line); background:var(--bg2); overflow:hidden;
 body.gs .h-right, body.gs .h-meta{transition:none}
 body.gsimg .hero-img{transition:none!important}
 body.gsimg #loader .ld-name>span{animation:none; transform:none}
+
+/* ---------- Punit AI ---------- */
+#paiBtn{position:fixed; right:18px; bottom:calc(18px + env(safe-area-inset-bottom,0px)); z-index:130;
+  display:inline-flex; align-items:center; gap:9px; border:1px solid var(--line2); border-radius:999px;
+  background:rgba(16,16,21,.82); backdrop-filter:blur(12px); color:var(--ink); font-family:"JetBrains Mono",monospace;
+  font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; padding:13px 19px; cursor:pointer;
+  transition:transform .25s, border-color .25s; box-shadow:0 10px 34px rgba(0,0,0,.45)}
+:root[data-theme="light"] #paiBtn{background:rgba(255,255,255,.85)}
+#paiBtn:hover{transform:translateY(-2px); border-color:var(--ink)}
+#paiBtn i{width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 2.4s infinite}
+#paiBtn.hidden{display:none}
+#paiHint{position:fixed; right:18px; bottom:calc(74px + env(safe-area-inset-bottom,0px)); z-index:130;
+  background:var(--panel); border:1px solid var(--line2); border-radius:14px; padding:12px 16px; max-width:240px;
+  font-size:13px; color:var(--dim); box-shadow:0 14px 40px rgba(0,0,0,.45); display:none}
+#paiHint.show{display:block}
+#paiHint b{display:block; color:var(--ink); font-weight:600; margin-bottom:2px; font-size:13px}
+#pai{position:fixed; right:18px; bottom:calc(18px + env(safe-area-inset-bottom,0px)); z-index:131;
+  width:min(400px, calc(100vw - 36px)); height:min(620px, calc(100svh - 110px));
+  display:none; flex-direction:column; overflow:hidden;
+  background:rgba(14,14,19,.92); backdrop-filter:blur(18px); border:1px solid var(--line2); border-radius:20px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6); transform:translateY(16px) scale(.97); opacity:0;
+  transition:transform .35s cubic-bezier(.2,.7,.2,1), opacity .35s}
+:root[data-theme="light"] #pai{background:rgba(250,250,252,.94)}
+#pai.open{display:flex}
+#pai.show{transform:none; opacity:1}
+#pai .pai-head{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:16px 18px; border-bottom:1px solid var(--line)}
+#pai .pai-head .t{font-family:Anton,sans-serif; font-size:17px; letter-spacing:.03em; text-transform:uppercase}
+#pai .pai-head .t i{color:var(--green); font-style:normal}
+#pai .pai-head .s{display:block; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-top:3px}
+#pai .pai-stat{display:inline-flex; align-items:center; gap:6px; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--green)}
+#pai .pai-stat i{width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2.4s infinite}
+#pai .pai-close{border:1px solid var(--line2); background:transparent; color:var(--ink); border-radius:999px; width:32px; height:32px; cursor:pointer; font-size:13px; flex-shrink:0}
+#pai .pai-close:hover{border-color:var(--ink)}
+#pai .pai-log{flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:10px; overscroll-behavior:contain}
+#pai .msg{max-width:86%; padding:11px 14px; border-radius:14px; font-size:13.5px; line-height:1.55; white-space:pre-line; opacity:0; transform:translateY(10px); transition:opacity .35s, transform .35s}
+#pai .msg.in{opacity:1; transform:none}
+#pai .msg.ai{align-self:flex-start; background:var(--panel); border:1px solid var(--line); color:var(--dim); border-bottom-left-radius:5px}
+#pai .msg.ai b{color:var(--ink); font-weight:600}
+#pai .msg.me{align-self:flex-end; background:var(--ink); color:var(--onInk); border-bottom-right-radius:5px}
+#pai .chips{display:flex; flex-wrap:wrap; gap:7px; opacity:0; transform:translateY(8px); transition:opacity .35s .1s, transform .35s .1s}
+#pai .chips.in{opacity:1; transform:none}
+#pai .chips button{border:1px solid var(--line2); background:transparent; color:var(--dim); border-radius:999px; padding:7px 13px; font-size:12px; cursor:pointer; transition:all .2s; font-family:inherit}
+#pai .chips button:hover{color:var(--ink); border-color:var(--ink)}
+#pai .chips button.act{border-color:var(--greenD); color:var(--green)}
+#pai .typing{align-self:flex-start; display:flex; gap:4px; padding:12px 14px}
+#pai .typing i{width:5px; height:5px; border-radius:50%; background:var(--faint); animation:paiB 1s infinite}
+#pai .typing i:nth-child(2){animation-delay:.15s}
+#pai .typing i:nth-child(3){animation-delay:.3s}
+@keyframes paiB{0%,100%{opacity:.3; transform:translateY(0)}50%{opacity:1; transform:translateY(-3px)}}
+#pai form{display:flex; gap:8px; padding:12px; border-top:1px solid var(--line); background:transparent}
+#pai form input{flex:1; border:1px solid var(--line2); background:var(--bg); color:var(--ink); border-radius:11px; padding:11px 13px; font:inherit; font-size:13.5px; cursor:text}
+#pai form input:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(61,220,132,.12)}
+#pai form button{border:0; background:var(--ink); color:var(--onInk); border-radius:11px; padding:0 16px; font-weight:600; font-size:13px; cursor:pointer; font-family:inherit; transition:opacity .2s}
+#pai form button:hover{opacity:.85}
+@media (max-width:600px){
+  #pai{right:10px; left:10px; width:auto; height:min(74svh, calc(100svh - 90px))}
+}
+
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important; transition:none!important}
   html{scroll-behavior:auto}
@@ -774,6 +832,21 @@ body.gsimg #loader .ld-name>span{animation:none; transform:none}
     </nav>
   </div>
 </footer>
+<button id="paiBtn" aria-haspopup="dialog" aria-expanded="false"><i aria-hidden="true"></i>Ask Punit AI</button>
+<div id="paiHint" role="status"><b>Need help exploring the projects?</b>Ask Punit AI anything about this portfolio.</div>
+<div id="pai" role="dialog" aria-modal="false" aria-label="Punit AI portfolio assistant">
+  <div class="pai-head">
+    <div><span class="t">Punit <i>AI</i></span><span class="s">Portfolio Assistant</span></div>
+    <span class="pai-stat"><i aria-hidden="true"></i>Available</span>
+    <button class="pai-close" id="paiClose" aria-label="Close assistant">✕</button>
+  </div>
+  <div class="pai-log" id="paiLog" aria-live="polite"></div>
+  <form id="paiForm">
+    <input id="paiIn" type="text" maxlength="600" placeholder="Ask about projects, skills, contact..." aria-label="Ask Punit AI a question" autocomplete="off">
+    <button type="submit">Send</button>
+  </form>
+</div>
+
 
 <script>
 var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1179,5 +1252,247 @@ document.getElementById('themeBtn').addEventListener('click', function(){
 })();
 
 </script>
+
+<script>
+/* ---------- Punit AI: portfolio assistant over structured knowledge ---------- */
+(function(){
+var K = {
+  name:'Punit Jain',
+  summary:'Punit Jain is a software engineer focused on AI, full stack development, data, mobile and connected IoT systems. He is a B.Tech Computer Science student at Avantika University, Ujjain (graduating 2027), and is available for software engineering, full stack, Android and applied AI internship opportunities.',
+  skills:{
+    'Languages':['Python','C++','C','JavaScript','SQL'],
+    'Frontend':['HTML5','CSS3 / Tailwind','React.js'],
+    'Backend':['Node.js','REST APIs'],
+    'Databases':['MySQL','MongoDB'],
+    'Mobile':['Kotlin','Android Studio'],
+    'AI & Data':['Machine Learning','Data Analysis','Power BI','Excel (Advanced)'],
+    'Tools':['Git & GitHub','Figma (UI/UX)','VS Code','Cisco Packet Tracer'],
+    'Core CS':['Data Structures & Algorithms','OOP','DBMS','Operating Systems','Software Engineering']
+  },
+  education:[
+    'B.Tech in Computer Science, Avantika University, Ujjain (2023-2027, pursuing, 1st class)',
+    'Class XII (PCM), Model Higher Secondary School, Ujjain (2022-2023)',
+    'Class X, Model Higher Secondary School, Ujjain (2020-2021)'
+  ],
+  experience:[
+    'Full Stack & IoT Developer, Academic Engineering & Innovation Labs (2023-present): cross-discipline projects combining ESP32 hardware, native Android apps and normalized databases',
+    'Hackathon contender and rapid prototyper at national and university hackathons (2024-present)',
+    'Currently seeking a Software Engineer internship (software engineering, full stack, Android or applied AI)'
+  ],
+  certs:[
+    'Data Analytics Essentials, Cisco Networking Academy (2026)',
+    'Introduction to Modern AI, Cisco Networking Academy (2026)',
+    'JavaScript Essentials 1, Cisco Networking Academy (2025)',
+    'C# Data Structures and Algorithms, Infosys Springboard (2025)',
+    'Math & Optimizations: Sets & Set Operations, Infosys Springboard (2024)',
+    'MongoDB Python Developer Path, MongoDB University (2024)',
+    'Digital Electronics, Infosys Springboard (2024)'
+  ],
+  contact:{email:'punitj668@gmail.com', phone:'+91 7773880738', location:'Ujjain, Madhya Pradesh, India',
+    linkedin:'https://www.linkedin.com/in/punit-jain-2426032b0/', github:'https://github.com/Punitjain2'},
+  resume:'PUNIT_JAIN_RESUME.pdf',
+  recruiter:{
+    'Software Engineering':{skills:['Python','C++','JavaScript','SQL','Data Structures & Algorithms','OOP','Operating Systems'], proj:[2,0,5]},
+    'Full Stack':{skills:['React.js','Node.js','REST APIs','HTML5','CSS3 / Tailwind','MySQL','MongoDB'], proj:[3,0]},
+    'AI / ML':{skills:['Machine Learning','Data Analysis','Python'], proj:[4]},
+    'Data / Analytics':{skills:['Power BI','Excel (Advanced)','SQL','MySQL','Data Analysis'], proj:[4,5,2]},
+    'Internship':null
+  }
+};
+var ALIAS = {
+  'Python':['python'], 'C++':['c++','cpp'], 'C':['c'], 'JavaScript':['javascript','js'], 'SQL':['sql'],
+  'HTML5':['html','html5'], 'CSS3 / Tailwind':['css','css3','tailwind'], 'React.js':['react','react.js','reactjs'],
+  'Node.js':['node','node.js','nodejs'], 'REST APIs':['rest api','rest apis','rest','apis'],
+  'MySQL':['mysql'], 'MongoDB':['mongodb','mongo'],
+  'Kotlin':['kotlin'], 'Android Studio':['android','android studio'],
+  'Machine Learning':['machine learning','ml'], 'Data Analysis':['data analysis'], 'Power BI':['power bi','powerbi'], 'Excel (Advanced)':['excel'],
+  'Git & GitHub':['git'], 'Figma (UI/UX)':['figma'], 'VS Code':['vs code','vscode'], 'Cisco Packet Tracer':['cisco','packet tracer'],
+  'Data Structures & Algorithms':['data structures','dsa','algorithms'], 'OOP':['oop'], 'DBMS':['dbms'], 'Operating Systems':['operating systems'], 'Software Engineering':['software engineering']
+};
+function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function tokIn(q, t){ return new RegExp('(^|[^a-z0-9])' + escRe(t) + '($|[^a-z0-9])').test(q); }
+var SKILL_INDEX = [];
+Object.keys(K.skills).forEach(function(c){ K.skills[c].forEach(function(s){
+  (ALIAS[s] || [s.toLowerCase()]).forEach(function(t){ SKILL_INDEX.push({s:s, c:c, t:t}); });
+}); });
+SKILL_INDEX.sort(function(a, b){ return b.t.length - a.t.length; });
+function matchSkill(q){ for(var i = 0; i < SKILL_INDEX.length; i++){ if(tokIn(q, SKILL_INDEX[i].t)) return SKILL_INDEX[i]; } return null; }
+
+var btn = document.getElementById('paiBtn'), panel = document.getElementById('pai'),
+    log = document.getElementById('paiLog'), form = document.getElementById('paiForm'),
+    inp = document.getElementById('paiIn'), hint = document.getElementById('paiHint');
+var opened = false, started = false;
+
+function el(cls, html){ var d = document.createElement('div'); d.className = cls; d.innerHTML = html; return d; }
+function show(node){ log.appendChild(node); requestAnimationFrame(function(){ requestAnimationFrame(function(){ node.classList.add('in'); }); }); log.scrollTop = log.scrollHeight; }
+function esc(t){ var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+function ai(text, after){
+  if(reduce){ deliver(); return; }
+  var t = el('typing','<i></i><i></i><i></i>'); t.classList.add('in'); log.appendChild(t); log.scrollTop = log.scrollHeight;
+  setTimeout(function(){ t.remove(); deliver(); }, 350);
+  function deliver(){ var m = el('msg ai', text); show(m); if(after) after(); }
+}
+function me(text){ show(el('msg me', esc(text))); }
+function chips(list){
+  var c = document.createElement('div'); c.className = 'chips';
+  list.forEach(function(it){
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = it[0];
+    if(it[2]) b.classList.add('act');
+    b.addEventListener('click', it[1]);
+    c.appendChild(b);
+  });
+  show(c);
+}
+function goTo(id){ closePai(); setTimeout(function(){ var t = document.querySelector(id); if(!t) return; if(window.__lenis) window.__lenis.scrollTo(t, {offset:-90}); else t.scrollIntoView({behavior: reduce ? 'auto' : 'smooth'}); }, 250); }
+function openProj(i){ closePai(); setTimeout(function(){ goToNoClose('#projects'); setTimeout(function(){ openModal(i); }, 700); }, 200); }
+function goToNoClose(id){ var t = document.querySelector(id); if(!t) return; if(window.__lenis) window.__lenis.scrollTo(t, {offset:-90}); else t.scrollIntoView({behavior: reduce ? 'auto' : 'smooth'}); }
+function mainChips(){
+  chips([
+    ['Explore Projects', function(){ me('Show me his projects'); listProjects(); }],
+    ['Technical Skills', function(){ me('What are his technical skills?'); skillsAnswer(); }],
+    ['Recruiter Mode', recruiterMode, true],
+    ['Contact Punit', function(){ me('How can I contact him?'); contactAnswer(); }],
+    ['Download Resume', function(){ window.open(K.resume, '_blank'); }]
+  ]);
+}
+function listProjects(){
+  var names = PROJECTS.map(function(p,i){ return (i+1)+'. '+p.title; }).join('\n');
+  ai('<b>Projects in Punit’s portfolio:</b>\n'+esc(names)+'\n\nAsk about any of them by name, or jump to the section.', function(){
+    chips([['View Projects Section', function(){ goTo('#projects'); }]].concat(
+      PROJECTS.slice(0,3).map(function(p,i){ return ['Open: '+p.title.split(' ').slice(0,2).join(' '), function(){ openProj(i); }]; })
+    ));
+  });
+}
+function skillsAnswer(){
+  var out = Object.keys(K.skills).map(function(c){ return '<b>'+esc(c)+':</b> '+esc(K.skills[c].join(', ')); }).join('\n');
+  ai(out, function(){ chips([['View Skills Section', function(){ goTo('#skills'); }]]); });
+}
+function contactAnswer(){
+  ai('<b>Contact Punit:</b>\nEmail: <a href="mailto:'+K.contact.email+'">'+K.contact.email+'</a>\nPhone: '+esc(K.contact.phone)+'\nLocation: '+esc(K.contact.location)+'\n<a href="'+K.contact.linkedin+'" target="_blank" rel="noopener">LinkedIn</a> · <a href="'+K.contact.github+'" target="_blank" rel="noopener">GitHub</a>',
+    function(){ chips([['Go to Contact Section', function(){ goTo('#contact'); }], ['Download Resume', function(){ window.open(K.resume,'_blank'); }]]); });
+}
+function recruiterMode(){
+  me('Recruiter Mode');
+  ai('<b>What are you looking for?</b>', function(){
+    chips(Object.keys(K.recruiter).map(function(cat){
+      return [cat, function(){ me(cat); recruiterAnswer(cat); }];
+    }));
+  });
+}
+function recruiterAnswer(cat){
+  var r = K.recruiter[cat];
+  if(!r){
+    ai('<b>Internship fit:</b>\nPunit is a final-phase B.Tech Computer Science student (Avantika University, 2027) actively seeking software engineering, full stack, Android or applied AI internships. His portfolio lists 7 built projects, 7 verified certifications and hands-on hardware plus software work.\n\nHis portfolio does not list completed internships; his experience so far is academic and hackathon-based.', function(){
+      chips([['View Experience', function(){ goTo('#experience'); }], ['Download Resume', function(){ window.open(K.resume,'_blank'); }], ['Contact Punit', function(){ goTo('#contact'); }]]);
+    });
+    return;
+  }
+  var pr = r.proj.map(function(i){ return '• '+PROJECTS[i].title; }).join('\n');
+  ai('<b>'+esc(cat)+'</b>\n\n<b>Relevant skills:</b> '+esc(r.skills.join(', '))+'\n\n<b>Relevant projects:</b>\n'+esc(pr), function(){
+    chips(r.proj.slice(0,2).map(function(i){ return ['Open: '+PROJECTS[i].title.split(' ').slice(0,2).join(' '), function(){ openProj(i); }]; })
+      .concat([['Download Resume', function(){ window.open(K.resume,'_blank'); }], ['Contact Punit', function(){ goTo('#contact'); }]]));
+  });
+}
+function findProject(q){
+  var best = -1, bestScore = 0;
+  PROJECTS.forEach(function(p, i){
+    var score = 0;
+    p.title.toLowerCase().split(/[^a-z]+/).forEach(function(w){ if(w.length > 3 && q.indexOf(w) !== -1) score++; });
+    if(score > bestScore){ bestScore = score; best = i; }
+  });
+  return bestScore > 0 ? best : -1;
+}
+function answer(raw){
+  var q = raw.toLowerCase();
+  function has(){ for(var i = 0; i < arguments.length; i++){ if(tokIn(q, arguments[i])) return true; } return false; }
+
+  if(has('recruiter','hiring','i am looking','looking to hire')) return recruiterMode();
+  if(has('resume','cv')) return ai('You can download Punit’s resume as a PDF.', function(){ chips([['Download Resume', function(){ window.open(K.resume,'_blank'); }]]); });
+  if(has('contact','email','phone','reach','hire him','get in touch')) return contactAnswer();
+  if(has('github')) return ai('Punit’s GitHub: <a href="'+K.contact.github+'" target="_blank" rel="noopener">github.com/Punitjain2</a>');
+  if(has('linkedin')) return ai('Punit’s LinkedIn: <a href="'+K.contact.linkedin+'" target="_blank" rel="noopener">linkedin.com/in/punit-jain</a>');
+  if(has('certif','license','credential')) return ai('<b>Certifications (7, all verified):</b>\n'+esc(K.certs.join('\n')), function(){ chips([['View Certifications', function(){ goTo('#certifications'); }]]); });
+  if(has('education','study','studying','degree','college','university','school')) return ai('<b>Education:</b>\n'+esc(K.education.join('\n')), function(){ chips([['View Education', function(){ goTo('#education'); }]]); });
+  if(has('internship','internships','experience','work history','job','jobs','employment')) return ai('<b>Experience:</b>\n'+esc(K.experience.join('\n\n'))+'\n\nHis portfolio does not list completed internships or formal employment; he is actively seeking his first industry internship.', function(){ chips([['View Experience', function(){ goTo('#experience'); }], ['Contact Punit', function(){ goTo('#contact'); }]]); });
+  if(has('where is he','location','based','city','where does he live')) return ai('Punit is based in '+esc(K.contact.location)+'.');
+  if(has('available','availability','open to')) return ai('Yes. Punit is available for opportunities: software engineering, full stack, Android and applied AI internships.', function(){ chips([['Contact Punit', function(){ goTo('#contact'); }]]); });
+  if(has('who is','about punit','about him','tell me about punit','who’s punit','whos punit')) return ai(esc(K.summary)+'\n\nI’m Punit’s portfolio assistant, so I can also help you explore his projects, skills and experience.', function(){ mainChips(); });
+
+  var pi = findProject(q);
+  if(pi !== -1){
+    var p = PROJECTS[pi];
+    return ai('<b>'+esc(p.title)+'</b>\n'+esc(p.catLabel)+'\n\n'+esc(p.desc)+'\n\n<b>Technologies:</b> '+esc(p.tags.filter(function(t){ return t.indexOf('more') === -1; }).join(', ')), function(){
+      chips([['Open Project', function(){ openProj(pi); }], ['All Projects', function(){ goTo('#projects'); }]]);
+    });
+  }
+  if(has('project','built','portfolio','work')) return listProjects();
+
+  var skillHit = matchSkill(q);
+  if(has('know','skill','use','uses','familiar','stack','technolog','language','frontend','backend','database','mobile','tool') || skillHit){
+    if(skillHit) return ai('Yes. '+esc(skillHit.s)+' is listed in Punit’s technical skills under '+esc(skillHit.c)+'.', function(){ chips([['View Skills', function(){ goTo('#skills'); }]]); });
+    if(has('language')) return ai('<b>Languages:</b> '+esc(K.skills['Languages'].join(', ')), function(){ chips([['View Skills', function(){ goTo('#skills'); }]]); });
+    if(has('frontend')) return ai('<b>Frontend:</b> '+esc(K.skills['Frontend'].join(', ')));
+    if(has('backend')) return ai('<b>Backend:</b> '+esc(K.skills['Backend'].join(', ')));
+    if(has('database')) return ai('<b>Databases:</b> '+esc(K.skills['Databases'].join(', ')));
+    if(has('mobile','android')) return ai('<b>Mobile:</b> '+esc(K.skills['Mobile'].join(', ')));
+    return skillsAnswer();
+  }
+  if(has('hi','hello','hey','namaste')) return ai('Hello. Ask me anything about Punit’s projects, skills, education, experience or how to contact him.', function(){ mainChips(); });
+
+  ai('I don’t have that information in Punit’s portfolio. I can help with his projects, skills, education, experience, certifications and contact details.', function(){ mainChips(); });
+}
+
+function openPai(){
+  opened = true;
+  btn.classList.add('hidden'); btn.setAttribute('aria-expanded','true');
+  hint.classList.remove('show');
+  panel.classList.add('open');
+  requestAnimationFrame(function(){ panel.classList.add('show'); });
+  if(!started){
+    started = true;
+    ai('Hi 👋 I’m <b>Punit AI</b>, Punit’s portfolio assistant.\n\nAsk me about his projects, skills, experience or background. I answer only from what is actually in this portfolio.', function(){ mainChips(); });
+  }
+  setTimeout(function(){ inp.focus(); }, reduce ? 0 : 380);
+}
+function closePai(){
+  panel.classList.remove('show');
+  setTimeout(function(){ panel.classList.remove('open'); }, reduce ? 0 : 320);
+  btn.classList.remove('hidden'); btn.setAttribute('aria-expanded','false');
+  if(opened){ btn.focus(); opened = false; }
+}
+btn.addEventListener('click', openPai);
+document.getElementById('paiClose').addEventListener('click', closePai);
+addEventListener('keydown', function(e){ if(e.key === 'Escape' && panel.classList.contains('open')) closePai(); });
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  var v = inp.value.trim();
+  if(!v) return;
+  if(v.length > 600) v = v.slice(0, 600);
+  inp.value = '';
+  me(v);
+  answer(v);
+});
+
+/* one-time contextual hint at the projects section */
+var hintShown = false;
+try{ hintShown = sessionStorage.getItem('pai-hint') === '1'; }catch(e){}
+if(!hintShown){
+  var hio = new IntersectionObserver(function(es){
+    es.forEach(function(en){
+      if(en.isIntersecting && !panel.classList.contains('open')){
+        hint.classList.add('show');
+        try{ sessionStorage.setItem('pai-hint','1'); }catch(e){}
+        setTimeout(function(){ hint.classList.remove('show'); }, 6000);
+        hio.disconnect();
+      }
+    });
+  }, {threshold:.2});
+  var ps = document.getElementById('projects');
+  if(ps) hio.observe(ps);
+}
+hint.addEventListener('click', function(){ hint.classList.remove('show'); openPai(); });
+})();
+</script>
+
 </body>
 </html>
