@@ -222,7 +222,7 @@ export async function POST(request) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      let buffer = '', sent = 0, finish = '';
+      let buffer = '', sent = 0, finish = '', dbg = { frames: 0, bad: 0, last: '' };
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -236,13 +236,14 @@ export async function POST(request) {
             const data = t.slice(5).trim();
             if (data === '[DONE]') continue;
             try {
+              dbg.last = data.slice(-160); dbg.frames++;
               const frame = JSON.parse(data);
               const choice = frame.choices?.[0];
               const delta = choice?.delta?.content;
               if (delta) { sent += delta.length; controller.enqueue(encoder.encode(delta)); }
               if (choice?.finish_reason) finish = choice.finish_reason;
               if (frame.error) console.error('stream frame error', JSON.stringify(frame.error).slice(0, 300));
-            } catch (e) { /* ignore keep-alives and partial frames */ }
+            } catch (e) { dbg.bad++; }
           }
         }
       } catch (e) {
@@ -251,7 +252,7 @@ export async function POST(request) {
       // If the provider cut the answer off, fetch it again in one piece. A form feed
       // tells the page to drop the partial text before showing the full answer.
       if (finish !== 'stop' && finish !== 'length') {
-        console.error('stream ended early', finish || 'no_finish_reason', sent);
+        console.error('stream ended early', finish || 'no_finish_reason', sent, JSON.stringify(dbg), 'buf:', buffer.length, buffer.slice(0, 160));
         try {
           const again = await callModel(false);
           const full = again.ok ? (await again.json()).choices?.[0]?.message?.content : '';
