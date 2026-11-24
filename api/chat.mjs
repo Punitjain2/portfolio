@@ -178,7 +178,9 @@ export async function POST(request) {
     return json(502, { error: 'unavailable' });
   }
   if (!upstream.ok || !upstream.body) {
-    console.error('gateway error', upstream.status);
+    let detail = '';
+    try { detail = (await upstream.text()).slice(0, 300); } catch (e) { detail = ''; }
+    console.error('gateway error', upstream.status, detail);
     return json(502, { error: 'unavailable' });
   }
 
