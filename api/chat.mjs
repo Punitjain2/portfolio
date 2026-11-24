@@ -13,6 +13,7 @@ function provider(request) {
       url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
       token: process.env.GEMINI_API_KEY,
       model: process.env.AI_MODEL || 'gemini-3.5-flash-lite',
+      fallbackModel: process.env.AI_FALLBACK_MODEL || 'gemini-3.5-flash',
       // Gemini 3 models always think; keep it minimal so the token budget goes to the answer.
       extra: { reasoning_effort: 'minimal' }
     };
@@ -180,14 +181,18 @@ export async function POST(request) {
   const ai = provider(request);
   if (!ai.token) return json(503, { error: 'unavailable' });
 
-  // One call to the model. Retries once when the provider is briefly overloaded.
+  // One answer from the model. If the provider is overloaded it waits and retries,
+  // then tries the fallback model once.
   const callModel = async (stream) => {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const res = await fetch(ai.url, {
+    const models = [ai.model, ai.model, ai.fallbackModel].filter(Boolean);
+    let res;
+    for (let i = 0; i < models.length; i++) {
+      if (i > 0) await new Promise((r) => setTimeout(r, 700));
+      res = await fetch(ai.url, {
         method: 'POST',
         headers: { Authorization: `Bearer ${ai.token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: ai.model,
+          model: models[i],
           stream,
           temperature: 0.5,
           max_tokens: 1500,
@@ -195,12 +200,10 @@ export async function POST(request) {
           ...(ai.extra || {})
         })
       });
-      if ((res.status === 429 || res.status === 503) && attempt === 0) {
-        await new Promise((r) => setTimeout(r, 700));
-        continue;
-      }
-      return res;
+      if (res.status !== 429 && res.status !== 503) return res;
+      console.error('model busy', models[i], res.status);
     }
+    return res;
   };
 
   let upstream;
@@ -222,7 +225,7 @@ export async function POST(request) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      let buffer = '', sent = 0, finish = '', dbg = { frames: 0, bad: 0, last: '' };
+      let buffer = '', sent = 0, finish = '';
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -232,18 +235,17 @@ export async function POST(request) {
           buffer = lines.pop();
           for (const line of lines) {
             const t = line.trim();
-            if (!t.startsWith('data:')) { if (t) dbg.other = ((dbg.other || '') + t).slice(0, 260); continue; }
+            if (!t.startsWith('data:')) continue;
             const data = t.slice(5).trim();
             if (data === '[DONE]') continue;
             try {
-              dbg.last = data.slice(-160); dbg.frames++;
               const frame = JSON.parse(data);
               const choice = frame.choices?.[0];
               const delta = choice?.delta?.content;
               if (delta) { sent += delta.length; controller.enqueue(encoder.encode(delta)); }
               if (choice?.finish_reason) finish = choice.finish_reason;
               if (frame.error) console.error('stream frame error', JSON.stringify(frame.error).slice(0, 300));
-            } catch (e) { dbg.bad++; }
+            } catch (e) { /* ignore keep-alives and partial frames */ }
           }
         }
       } catch (e) {
@@ -252,16 +254,16 @@ export async function POST(request) {
       // If the provider cut the answer off, fetch it again in one piece. A form feed
       // tells the page to drop the partial text before showing the full answer.
       if (finish !== 'stop' && finish !== 'length') {
-        console.error('stream ended early', finish || 'no_finish_reason', sent, JSON.stringify(dbg), 'buf:', buffer.length, buffer.slice(0, 160));
+        console.error('stream ended early', finish || 'no_finish_reason', sent);
         try {
           const again = await callModel(false);
           const full = again.ok ? (await again.json()).choices?.[0]?.message?.content : '';
-          // No full answer and almost nothing sent: clear it so the page uses its built-in answers.
-          if (full) controller.enqueue(encoder.encode('\f' + full));
-          else if (sent < 80) controller.enqueue(encoder.encode('\f'));
+          // No full answer either: clear the half sentence so the page uses its built-in answers.
+          controller.enqueue(encoder.encode('\f' + (full || '')));
+          if (!full) console.error('retry failed', again.status);
         } catch (e) {
           console.error('retry failed');
-          if (sent < 80) controller.enqueue(encoder.encode('\f'));
+          controller.enqueue(encoder.encode('\f'));
         }
       }
       controller.close();
