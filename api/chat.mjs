@@ -232,7 +232,7 @@ export async function POST(request) {
           buffer = lines.pop();
           for (const line of lines) {
             const t = line.trim();
-            if (!t.startsWith('data:')) continue;
+            if (!t.startsWith('data:')) { if (t) dbg.other = ((dbg.other || '') + t).slice(0, 260); continue; }
             const data = t.slice(5).trim();
             if (data === '[DONE]') continue;
             try {
