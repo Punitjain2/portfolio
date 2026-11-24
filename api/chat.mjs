@@ -12,7 +12,7 @@ function provider(request) {
     return {
       url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
       token: process.env.GEMINI_API_KEY,
-      model: process.env.AI_MODEL || 'gemini-2.5-flash-lite'
+      model: process.env.AI_MODEL || 'gemini-3.5-flash-lite'
     };
   }
   const token = process.env.AI_GATEWAY_API_KEY || request.headers.get('x-vercel-oidc-token') || process.env.VERCEL_OIDC_TOKEN;
