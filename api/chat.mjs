@@ -1,10 +1,27 @@
 // Punit AI backend: answers as Punit (first person) using his portfolio data,
 // and answers general tech questions normally.
-// Model access goes through Vercel AI Gateway using the deployment's OIDC token,
-// so no API key is stored anywhere. AI_GATEWAY_API_KEY is an optional override.
+// Provider is chosen from server-side environment variables only:
+//   GEMINI_API_KEY set  -> Google Gemini (free key from aistudio.google.com, no card needed)
+//   otherwise           -> Vercel AI Gateway (AI_GATEWAY_API_KEY, or the deployment's OIDC token;
+//                          the gateway needs a card on file in the Vercel account)
+// Both speak the OpenAI chat-completions format, so nothing else changes.
+// AI_MODEL optionally overrides the model id.
 
-const MODEL = process.env.AI_MODEL || 'google/gemini-2.5-flash-lite';
-const GATEWAY_URL = 'https://ai-gateway.vercel.sh/v1/chat/completions';
+function provider(request) {
+  if (process.env.GEMINI_API_KEY) {
+    return {
+      url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+      token: process.env.GEMINI_API_KEY,
+      model: process.env.AI_MODEL || 'gemini-2.5-flash-lite'
+    };
+  }
+  const token = process.env.AI_GATEWAY_API_KEY || request.headers.get('x-vercel-oidc-token') || process.env.VERCEL_OIDC_TOKEN;
+  return {
+    url: 'https://ai-gateway.vercel.sh/v1/chat/completions',
+    token,
+    model: process.env.AI_MODEL || 'google/gemini-2.5-flash-lite'
+  };
+}
 
 const MAX_MESSAGE_CHARS = 1200;
 const MAX_HISTORY = 12;
@@ -158,16 +175,16 @@ export async function POST(request) {
   const messages = cleanMessages(body && body.messages);
   if (!messages) return json(400, { error: 'bad_request' });
 
-  const token = process.env.AI_GATEWAY_API_KEY || request.headers.get('x-vercel-oidc-token') || process.env.VERCEL_OIDC_TOKEN;
-  if (!token) return json(503, { error: 'unavailable' });
+  const ai = provider(request);
+  if (!ai.token) return json(503, { error: 'unavailable' });
 
   let upstream;
   try {
-    upstream = await fetch(GATEWAY_URL, {
+    upstream = await fetch(ai.url, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${ai.token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: MODEL,
+        model: ai.model,
         stream: true,
         temperature: 0.5,
         max_tokens: 800,
