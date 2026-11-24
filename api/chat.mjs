@@ -12,7 +12,9 @@ function provider(request) {
     return {
       url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
       token: process.env.GEMINI_API_KEY,
-      model: process.env.AI_MODEL || 'gemini-3.5-flash-lite'
+      model: process.env.AI_MODEL || 'gemini-3.5-flash-lite',
+      // Gemini 3 models always think; keep it minimal so the token budget goes to the answer.
+      extra: { reasoning_effort: 'minimal' }
     };
   }
   const token = process.env.AI_GATEWAY_API_KEY || request.headers.get('x-vercel-oidc-token') || process.env.VERCEL_OIDC_TOKEN;
@@ -187,8 +189,9 @@ export async function POST(request) {
         model: ai.model,
         stream: true,
         temperature: 0.5,
-        max_tokens: 800,
-        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages]
+        max_tokens: 1500,
+        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
+        ...(ai.extra || {})
       })
     });
   } catch (e) {
