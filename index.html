@@ -1496,15 +1496,15 @@ function askAI(q){
   if(busy) return;
   busy = true;
   var t = el('typing', '<i></i><i></i><i></i>'); t.classList.add('in'); log.appendChild(t); log.scrollTop = log.scrollHeight;
-  var msgs = chatHistory.concat([{role:'user', content:q}]).slice(-12);
+  var msgs = chatHistory.concat([{role:'user', content:q}]).slice(-12), m = null;
   fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({messages: msgs})})
     .then(function(res){
       if(!res.ok || !res.body) throw new Error('unavailable');
-      var reader = res.body.getReader(), dec = new TextDecoder(), text = '', m = null;
+      var reader = res.body.getReader(), dec = new TextDecoder(), text = '';
       function pump(){
         return reader.read().then(function(r){
           if(r.done) return;
-          text += dec.decode(r.value, {stream:true});
+          text += dec.decode(r.value, {stream:true}); var ff = text.lastIndexOf('\f'); if(ff !== -1) text = text.slice(ff + 1);
           if(!m){ t.remove(); m = el('msg ai', ''); show(m); }
           m.innerHTML = md(text);
           log.scrollTop = log.scrollHeight;
@@ -1520,6 +1520,7 @@ function askAI(q){
     })
     .catch(function(){
       if(t.parentNode) t.remove();
+      if(m && m.parentNode) m.remove();
       answer(q);
     })
     .then(function(){ busy = false; });

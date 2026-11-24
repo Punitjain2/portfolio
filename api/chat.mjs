@@ -180,20 +180,32 @@ export async function POST(request) {
   const ai = provider(request);
   if (!ai.token) return json(503, { error: 'unavailable' });
 
+  // One call to the model. Retries once when the provider is briefly overloaded.
+  const callModel = async (stream) => {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = await fetch(ai.url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${ai.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: ai.model,
+          stream,
+          temperature: 0.5,
+          max_tokens: 1500,
+          messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
+          ...(ai.extra || {})
+        })
+      });
+      if ((res.status === 429 || res.status === 503) && attempt === 0) {
+        await new Promise((r) => setTimeout(r, 700));
+        continue;
+      }
+      return res;
+    }
+  };
+
   let upstream;
   try {
-    upstream = await fetch(ai.url, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${ai.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: ai.model,
-        stream: true,
-        temperature: 0.5,
-        max_tokens: 1500,
-        messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
-        ...(ai.extra || {})
-      })
-    });
+    upstream = await callModel(true);
   } catch (e) {
     return json(502, { error: 'unavailable' });
   }
@@ -236,7 +248,21 @@ export async function POST(request) {
       } catch (e) {
         console.error('stream error');
       }
-      if (finish !== 'stop') console.error('stream ended early', finish || 'no_finish_reason', sent, buffer.slice(0, 200));
+      // If the provider cut the answer off, fetch it again in one piece. A form feed
+      // tells the page to drop the partial text before showing the full answer.
+      if (finish !== 'stop' && finish !== 'length') {
+        console.error('stream ended early', finish || 'no_finish_reason', sent);
+        try {
+          const again = await callModel(false);
+          const full = again.ok ? (await again.json()).choices?.[0]?.message?.content : '';
+          // No full answer and almost nothing sent: clear it so the page uses its built-in answers.
+          if (full) controller.enqueue(encoder.encode('\f' + full));
+          else if (sent < 80) controller.enqueue(encoder.encode('\f'));
+        } catch (e) {
+          console.error('retry failed');
+          if (sent < 80) controller.enqueue(encoder.encode('\f'));
+        }
+      }
       controller.close();
     }
   });
