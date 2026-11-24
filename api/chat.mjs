@@ -210,7 +210,7 @@ export async function POST(request) {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      let buffer = '';
+      let buffer = '', sent = 0, finish = '';
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -224,14 +224,19 @@ export async function POST(request) {
             const data = t.slice(5).trim();
             if (data === '[DONE]') continue;
             try {
-              const delta = JSON.parse(data).choices?.[0]?.delta?.content;
-              if (delta) controller.enqueue(encoder.encode(delta));
+              const frame = JSON.parse(data);
+              const choice = frame.choices?.[0];
+              const delta = choice?.delta?.content;
+              if (delta) { sent += delta.length; controller.enqueue(encoder.encode(delta)); }
+              if (choice?.finish_reason) finish = choice.finish_reason;
+              if (frame.error) console.error('stream frame error', JSON.stringify(frame.error).slice(0, 300));
             } catch (e) { /* ignore keep-alives and partial frames */ }
           }
         }
       } catch (e) {
         console.error('stream error');
       }
+      if (finish !== 'stop') console.error('stream ended early', finish || 'no_finish_reason', sent, buffer.slice(0, 200));
       controller.close();
     }
   });
