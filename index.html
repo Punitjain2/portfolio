@@ -455,6 +455,8 @@ body.gsimg #loader .ld-name>span{animation:none; transform:none}
 #pai .msg.in{opacity:1; transform:none}
 #pai .msg.ai{align-self:flex-start; background:var(--panel); border:1px solid var(--line); color:var(--dim); border-bottom-left-radius:5px}
 #pai .msg.ai b{color:var(--ink); font-weight:600}
+#pai .msg pre{white-space:pre; overflow-x:auto; background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin:6px 0; font:11.5px/1.5 "JetBrains Mono",monospace; color:var(--ink)}
+#pai .msg code{font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--ink)}
 #pai .msg.me{align-self:flex-end; background:var(--ink); color:var(--onInk); border-bottom-right-radius:5px}
 #pai .chips{display:flex; flex-wrap:wrap; gap:7px; opacity:0; transform:translateY(8px); transition:opacity .35s .1s, transform .35s .1s}
 #pai .chips.in{opacity:1; transform:none}
@@ -842,7 +844,7 @@ body.gsimg #loader .ld-name>span{animation:none; transform:none}
   </div>
   <div class="pai-log" id="paiLog" aria-live="polite"></div>
   <form id="paiForm">
-    <input id="paiIn" type="text" maxlength="600" placeholder="Ask about projects, skills, contact..." aria-label="Ask Punit AI a question" autocomplete="off">
+    <input id="paiIn" type="text" maxlength="1200" placeholder="Ask me anything..." aria-label="Ask Punit AI a question" autocomplete="off">
     <button type="submit">Send</button>
   </form>
 </div>
@@ -1450,7 +1452,7 @@ function openPai(){
   requestAnimationFrame(function(){ panel.classList.add('show'); });
   if(!started){
     started = true;
-    ai('Hi 👋 I’m <b>Punit AI</b>, Punit’s portfolio assistant.\n\nAsk me about his projects, skills, experience or background. I answer only from what is actually in this portfolio.', function(){ mainChips(); });
+    ai('Hi 👋 I’m <b>Punit AI</b>, the AI version of Punit.\n\nAsk me about my projects, skills and experience, or anything about programming, AI and tech.', function(){ mainChips(); });
   }
   setTimeout(function(){ inp.focus(); }, reduce ? 0 : 380);
 }
@@ -1467,11 +1469,61 @@ form.addEventListener('submit', function(e){
   e.preventDefault();
   var v = inp.value.trim();
   if(!v) return;
-  if(v.length > 600) v = v.slice(0, 600);
+  if(v.length > 1200) v = v.slice(0, 1200);
   inp.value = '';
   me(v);
-  answer(v);
+  askAI(v);
 });
+
+/* ---------- AI replies: streamed from /api/chat, rule engine as offline fallback ---------- */
+var chatHistory = [], busy = false;
+function md(s){
+  return s.split('```').map(function(p, i){
+    if(i % 2){
+      var nl = p.indexOf('\n');
+      var code = (nl > -1 && /^[\w+#.-]*$/.test(p.slice(0, nl).trim())) ? p.slice(nl + 1) : p;
+      return '<pre><code>' + esc(code.replace(/\n$/, '')) + '</code></pre>';
+    }
+    return esc(p)
+      .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>')
+      .replace(/^#{1,4}\s+(.+)$/gm, '<b>$1</b>')
+      .replace(/^\s*[-*]\s+/gm, '\u2022 ')
+      .replace(/\[([^\]\n]+)\]\(((?:https?:\/\/|mailto:)[^\s)"'<>]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  }).join('');
+}
+function askAI(q){
+  if(busy) return;
+  busy = true;
+  var t = el('typing', '<i></i><i></i><i></i>'); t.classList.add('in'); log.appendChild(t); log.scrollTop = log.scrollHeight;
+  var msgs = chatHistory.concat([{role:'user', content:q}]).slice(-12);
+  fetch('/api/chat', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({messages: msgs})})
+    .then(function(res){
+      if(!res.ok || !res.body) throw new Error('unavailable');
+      var reader = res.body.getReader(), dec = new TextDecoder(), text = '', m = null;
+      function pump(){
+        return reader.read().then(function(r){
+          if(r.done) return;
+          text += dec.decode(r.value, {stream:true});
+          if(!m){ t.remove(); m = el('msg ai', ''); show(m); }
+          m.innerHTML = md(text);
+          log.scrollTop = log.scrollHeight;
+          return pump();
+        });
+      }
+      return pump().then(function(){
+        if(!text.trim()) throw new Error('empty');
+        chatHistory = msgs.concat([{role:'assistant', content:text}]).slice(-12);
+        var pi = findProject(q.toLowerCase());
+        if(pi !== -1) chips([['Open Project', function(){ openProj(pi); }]]);
+      });
+    })
+    .catch(function(){
+      if(t.parentNode) t.remove();
+      answer(q);
+    })
+    .then(function(){ busy = false; });
+}
 
 /* one-time contextual hint at the projects section */
 var hintShown = false;
