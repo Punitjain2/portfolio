@@ -191,6 +191,8 @@ export async function POST(request) {
       res = await fetch(ai.url, {
         method: 'POST',
         headers: { Authorization: `Bearer ${ai.token}`, 'Content-Type': 'application/json' },
+        // Never leave a visitor waiting on a stuck provider.
+        signal: AbortSignal.timeout(stream ? 30000 : 12000),
         body: JSON.stringify({
           model: models[i],
           stream,
